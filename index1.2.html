@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Movie Portal</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.4s ease-in-out;
+      background-image: none;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: linear-gradient(90deg, #ff6600, #cc3300);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-icon {
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .top-bar h2 {
+      margin: 0;
+      color: white;
+      font-size: 22px;
+    }
+
+    .top-bar button {
+      background-color: white;
+      color: #cc3300;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      margin-left: 5px;
+    }
+
+    .side-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      left: 15px;
+      background-color: #1a1a1a;
+      border: 1px solid #ff6600;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .side-menu a,
+    .side-menu button {
+      display: block;
+      color: #ffcc66;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    .side-menu a:hover,
+    .side-menu button:hover {
+      background-color: #333;
+    }
+
+    .category-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      background-color: #111;
+      border-bottom: 1px solid #333;
+      flex-wrap: wrap;
+    }
+
+    .category-btn {
+      background-color: transparent;
+      border: 1px solid #ff6600;
+      color: #ff6600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .category-btn:hover,
+    .category-btn.active {
+      background-color: #ff6600;
+      color: white;
+    }
+
+    .search-section {
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .search-box {
+      max-width: 400px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 40px;
+      font-size: 18px;
+      border-radius: 30px;
+      border: 2px solid #ff6600;
+      background-color: #222;
+      color: white;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-box input::placeholder {
+      color: #bbb;
+      transition: opacity 0.3s ease;
+    }
+
+    .search-box input:focus::placeholder {
+      opacity: 0.5;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #ffaa00;
+      box-shadow: 0 0 10px rgba(255, 165, 0, 0.6);
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: #ffcc66;
+      pointer-events: none;
+    }
+
+    /* Autocomplete suggestions box */
+    #suggestions {
+      position: absolute;
+      background-color: #222;
+      max-width: 400px;
+      width: 100%;
+      border: 2px solid #ff6600;
+      border-top: none;
+      border-radius: 0 0 20px 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #suggestions div {
+      padding: 8px 15px;
+      border-bottom: 1px solid #444;
+    }
+
+    #suggestions div:hover {
+      background-color: #ff6600;
+      color: black;
+    }
+
+    .movie-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .movie {
+      width: 320px;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.3s;
+    }
+
+    .movie:hover {
+      transform: scale(1.03);
+    }
+
+    .movie img {
+      width: 100%;
+      display: block;
+    }
+
+    .movie-title {
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      color: #ffcc66;
+    }
+
+    .back-button {
+      background: none;
+      border: none;
+      color: #ff6600;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      display: inline-block;
+      width: 100%;
+      text-align: left;
+    }
+
+    .no-result {
+      color: #ff6600;
+      text-align: center;
+      margin-top: 30px;
+      font-size: 18px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    @media screen and (max-width: 500px) {
+      .movie {
+        width: 90%;
+      }
+    }
+
+    /* Highlight matched text */
+    .highlight {
+      background-color: #ffaa00;
+      color: black;
+      font-weight: bold;
+      border-radius: 3px;
+      padding: 0 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    <h2>Movie Portal</h2>
+    <div>
+      <button onclick="showSearch()">🔍 Search</button>
+      <button onclick="document.getElementById('bgUpload').click()">🖼️ Upload BG</button>
+      <button onclick="resetBackground()">❌ Reset BG</button>
+    </div>
+  </div>
+
+  <input type="file" id="bgUpload" accept="image/*" onchange="setCustomBackground(event)" />
+
+  <div id="sideMenu" class="side-menu">
+    <a href="#" onclick="showAbout(); toggleMenu();">About</a>
+    <a href="https://t.me/abhimoveking" target="_blank" onclick="toggleMenu()">Telegram</a>
+    <button onclick="showUpdate(); toggleMenu();">Update</button>
+  </div>
+
+  <div class="category-bar" id="categoryBar">
+    <button class="category-btn active" data-category="All">All</button>
+    <button class="category-btn" data-category="Hindi">Hindi</button>
+    <button class="category-btn" data-category="English">English</button>
+    <button class="category-btn" data-category="Urdu">Urdu</button>
+    <button class="category-btn" data-category="Bollywood">Bollywood</button>
+    <button class="category-btn" data-category="South">South</button>
+    <button class="category-btn" data-category="Punjabi">Punjabi</button>
+  </div>
+
+  <div class="search-section" id="searchSection" style="display:none;">
+    <button class="back-button" onclick="hideSearch()">← Back</button>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search by title or category..."
+        autocomplete="off"
+        oninput="handleSearchInput()"
+        onkeydown="handleArrowKeys(event)"
+      />
+      <div id="suggestions" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="movie-container" id="movieContainer"></div>
+
+<script>
+  const movieContainer = document.getElementById("movieContainer");
+  const searchSection = document.getElementById("searchSection");
+  const searchInput = document.getElementById("searchInput");
+  const suggestionsBox = document.getElementById("suggestions");
+  const categoryBar = document.getElementById("categoryBar");
+  const categoryButtons = document.querySelectorAll(".category-btn");
+
+  const moviesData = [
+    {
+      title: "JANA NAYAGAN",
+      img: "https://i.ytimg.com/vi/ryutkf-KfH8/hq720.jpg",
+      link: "https://youtu.be/NyYlmlchKE0?si=bwdTBHJCztWPBexh",
+      category: "South"
+    },
+    {
+      title: "THRI",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi4PsEBaIIyaZvjQqACg9S-Nvsd5JRr-UkrQ&s",
+      link: "https://youtu.be/9rq87EQAPt0?si=_ylkKo4Vdgyga4dt",
+      category: "South"
+    },
+    {
+      title: "Romeo",
+      img: "https://i.ytimg.com/vi/lHJrIxL0C0c/maxresdefault.jpg",
+      link: "https://youtu.be/lHJrIxL0C0c?si=QMttQCWq7T3wiy29",
+      category: "Bollywood"
+    }
+  ];
+
+  // Toggle side menu visibility
+  function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  // Show About alert
+  function showAbout() {
+    alert("📖 This is a movie portal built with love.");
+  }
+
+  // Show Update alert
+  function showUpdate() {
+    alert("🔔 Update: Version 1.1");
+  }
+
+  // Show search section
+  function showSearch() {
+    searchSection.style.display = "block";
+    categoryBar.style.display = "none";
+    movieContainer.innerHTML = "";
+    searchInput.value = "";
+    suggestionsBox.style.display = "none";
+  }
+
+  // Hide search section
+  function hideSearch() {
+    searchSection.style.display = "none";
+    categoryBar.style.display = "flex";
+    searchInput.value = "";
+    suggestionsBox.style.display = "none";
+    displayMovies("All");
+  }
+
+  // Highlight matched text
+  function highlightMatch(text, query) {
+    if (!query) return text;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
+    return text.replace(regex, `<span class="highlight">$1</span>`);
+  }
+
+  // Render movies with optional search highlighting
+  function renderMovies(movies, query = "") {
+    movieContainer.innerHTML = "";
+    if (movies.length === 0) {
+      movieContainer.innerHTML = `<div class="no-result">No movies found</div>`;
+      return;
+    }
+    movies.forEach(movie => {
+      const titleHL = highlightMatch(movie.title, query);
+      const categoryHL = highlightMatch(movie.category, query);
+      const div = document.createElement("div");
+      div.className = "movie";
+      div.innerHTML = `
+        <a href="dow1pej.html?title=${encodeURIComponent(movie.title)}&img=${encodeURIComponent(movie.img)}&link=${encodeURIComponent(movie.link)}">
+          <img src="${movie.img}" alt="${movie.title}" />
+        </a>
+        <div class="movie-title">${titleHL} (${categoryHL})</div>
+      `;
+      movieContainer.appendChild(div);
+    });
+  }
+
+  // Display movies filtered by category without highlight
+  function displayMovies(category) {
+    const filtered = category === "All"
+      ? moviesData
+      : moviesData.filter(m => m.category === category);
+    renderMovies(filtered);
+  }
+
+  categoryButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      categoryButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      displayMovies(btn.dataset.category);
+    });
+  });
+
+  displayMovies("All");
+
+  // Autocomplete suggestion handling
+
+  let selectedSuggestionIndex = -1;
+
+  function handleSearchInput() {
+    const query = searchInput.value.trim().toLowerCase();
+    if (!query) {
+      suggestionsBox.style.display = "none";
+      renderMovies(moviesData);
+      return;
+    }
+    // Filter movies that match title or category
+    const matchedMovies = moviesData.filter(movie =>
+      movie.title.toLowerCase().includes(query) ||
+      movie.category.toLowerCase().includes(query)
+    );
+
+    // Prepare suggestion strings (title + category)
+    const suggestions = [];
+    matchedMovies.forEach(m => {
+      suggestions.push(m.title);
+      if (!suggestions.includes(m.category)) {
+        suggestions.push(m.category);
+      }
+    });
+
+    // Remove duplicates and filter suggestions containing query
+    const filteredSuggestions = [...new Set(suggestions)].filter(s => s.toLowerCase().includes(query));
+
+    // Show suggestions box
+    if (filteredSuggestions.length === 0) {
+      suggestionsBox.style.display = "none";
+      renderMovies(matchedMovies, query);
+      return;
+    }
+
+    suggestionsBox.innerHTML = "";
+    filteredSuggestions.forEach((s, i) => {
+      const div = document.createElement("div");
+      div.innerHTML = highlightMatch(s, query);
+      div.addEventListener("click", () => {
+        searchInput.value = s;
+        suggestionsBox.style.display = "none";
+        // Filter movies based on selection
+        const filteredMovies = moviesData.filter(m =>
+          m.title.toLowerCase().includes(s.toLowerCase()) ||
+          m.category.toLowerCase().includes(s.toLowerCase())
+        );
+        renderMovies(filteredMovies, s);
+      });
+      suggestionsBox.appendChild(div);
+    });
+    suggestionsBox.style.display = "block";
+    selectedSuggestionIndex = -1;
+
+    // Also render movies filtered with current query & highlight
+    renderMovies(matchedMovies, query);
+  }
+
+  // Keyboard navigation for suggestions (up/down + enter)
+  function handleArrowKeys(e) {
+    if (suggestionsBox.style.display === "none") return;
+
+    const items = suggestionsBox.querySelectorAll("div");
+    if (items.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      selectedSuggestionIndex = (selectedSuggestionIndex + 1) % items.length;
+      updateSuggestionSelection(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      selectedSuggestionIndex = (selectedSuggestionIndex - 1 + items.length) % items.length;
+      updateSuggestionSelection(items);
+    } else if (e.key === "ChatGPT said:Enter") 
+{
+e.preventDefault();
+if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < items.length) {
+items[selectedSuggestionIndex].click();
+}
+}
+}
+
+function updateSuggestionSelection(items) {
+items.forEach((item, idx) => {
+if (idx === selectedSuggestionIndex) {
+item.style.backgroundColor = "#ff6600";
+item.style.color = "black";
+} else {
+item.style.backgroundColor = "";
+item.style.color = "white";
+}
+});
+}
+
+// Background image upload/reset functions (optional)
+function setCustomBackground(event) {
+const file = event.target.files[0];
+if (!file) return;
+
+javascript
+Copy
+Edit
+const reader = new FileReader();
+reader.onload = function(e) {
+  document.body.style.backgroundImage = `url('${e.target.result}')`;
+  localStorage.setItem("customBg", e.target.result);
+};
+reader.readAsDataURL(file);
+}
+
+function resetBackground() {
+document.body.style.backgroundImage = "none";
+localStorage.removeItem("customBg");
+}
+
+// Load saved background on page load
+window.onload = function() {
+const savedBg = localStorage.getItem("customBg");
+if (savedBg) {
+document.body.style.backgroundImage = url('${savedBg}');
+}
+};
+</script>
+
+</body>
+ </html> ```
